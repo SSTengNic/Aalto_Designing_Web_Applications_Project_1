@@ -1,0 +1,12 @@
+---
+import Layout from "../layout/Layout.astro";
+import GradingButton from "../components/GradingButton.svelte";
+import RotatingCard from "../components/RotatingCard.svelte";
+import TestingStuff from "../components/testingStuff.svelte";
+import CodeEditor from "../components/CodeEditor.svelte";
+---
+
+<Layout>
+    <RotatingCard client:load />
+    <!-- <GradingButton client:only={"svelte"} /> -->
+</Layout>
