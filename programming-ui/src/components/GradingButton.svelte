@@ -5,7 +5,7 @@
         const data = {
             user: $userUuid,
             code: `def hello():
-  return "Hello"
+  return "Helol"
 `,
         };
 

@@ -8,10 +8,27 @@ import { serve } from "./deps.js";
 const cachedPracService = cacheMethodCalls(pracService, ["getPracs"]);
 
 // Change this into proper grading service when you get more information.
-const cachedGradingService = cacheMethodCalls(pracService, ["getPracs"]);
+//const cachedGradingService = cacheMethodCalls(pracService, ["getPracs"]);
 
 const getAssignments = async (request) => {
     return Response.json(await cachedPracService.getAssignments());
+};
+
+const getAssignment = async (request, urlPatternResult) => {
+    const id = urlPatternResult.pathname.groups.id;
+    try {
+        const assignment = await cachedPracService.getAssignment(id);
+        console.log("assignment is: ", assignment);
+        if (!assignment || assignment.length === 0) {
+            return new Response("Assignment not found", { status: 404 });
+        } else {
+            return new Response(JSON.stringify(assignment), {
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+    } catch (error) {
+        return new Response("Internal Server Error", { status: 500 });
+    }
 };
 
 const GetPracs = async (request) => {
@@ -21,11 +38,11 @@ const GetPracs = async (request) => {
 const GetPrac = async (request, urlPatternResult) => {
     const id = urlPatternResult.pathname.groups.id;
     try {
-        const pracs = await cachedPracService.getPrac(id);
-        if (pracs.length === 0) {
+        const prac = await cachedPracService.getPrac(id);
+        if (prac.length === 0) {
             return new Response("Practice not found", { status: 404 });
         } else {
-            return new Response(JSON.stringify(pracs[0]), {
+            return new Response(JSON.stringify(prac), {
                 headers: { "Content-Type": "application/json" },
             });
         }
@@ -72,6 +89,7 @@ const PostPrac = async (request) => {
                 prac.code,
                 prac.user_uuid
             );
+
             return new Response(
                 JSON.stringify({ message: "Submission added successfully." }),
                 {
@@ -94,13 +112,14 @@ const PostPrac = async (request) => {
 
 // Handle grading logic (integrating the grading service)
 const handleGradingRequest = async (request) => {
-    const programmingAssignments = await programmingAssignmentService.findAll();
+    //const programmingAssignments = await programmingAssignmentService.findAll();
 
     const requestData = await request.json();
-    const testCode = programmingAssignments[0]["test_code"];
+    console.log("requestData: ", requestData.testCode);
+    //const testCode = programmingAssignments[0]["test_code"];
     const data = {
-        testCode: testCode,
         code: requestData.code,
+        testCode: requestData.testCode,
     };
 
     const response = await fetch("http://grader-api:7000/", {
@@ -128,7 +147,12 @@ const urlMapping = [
     },
     {
         method: "GET",
-        pattern: new URLPattern({ pathname: "/prac_test" }),
+        pattern: new URLPattern({ pathname: "/assignment/:id" }),
+        fn: getAssignment,
+    },
+    {
+        method: "GET",
+        pattern: new URLPattern({ pathname: "/assignments" }),
         fn: getAssignments,
     },
     {

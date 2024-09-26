@@ -9,7 +9,7 @@
     };
 
     const getAllQuestions = async () => {
-        const response = await fetch("/api/prac_test");
+        const response = await fetch("/api/assignments");
         return await response.json();
     };
     let AssignmentPromise = getAllQuestions();

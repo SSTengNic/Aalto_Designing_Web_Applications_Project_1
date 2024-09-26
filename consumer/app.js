@@ -7,7 +7,8 @@ const client = createClient({
 
 const sendToGradingAPI = async (submission) => {
     try {
-        const response = await fetch("/api/grade", {
+        console.log("submission is: ", submission);
+        const response = await fetch("http://grader-api:7000/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -20,10 +21,14 @@ const sendToGradingAPI = async (submission) => {
         }
 
         const responseData = await response.json();
-        console.log("Grading API Response:", responseData);
+        const result = responseData.result;
+
+        // Format the result by replacing \n with actual line breaks
+        const formattedResult = result.replace(/\\n/g, "\n").trim();
+        console.log("Grading API Response:", formattedResult);
 
         // Process the response (e.g., update the database)
-        return responseData;
+        return formattedResult;
     } catch (error) {
         console.error("Error sending to grading API:", error);
         return null;
@@ -35,24 +40,29 @@ const clientStart = async () => {
 
     while (true) {
         const submissionRecieved = await client.brPop("submissionQueue", 0);
+        console.log("submissionRecievd: ", submissionRecieved);
 
         if (submissionRecieved) {
-            const [queue, submissionString] = submissionRecieved;
-            console.log(
-                `Processing submission from ${queue}: ${submissionString}`
-            );
+            console.log("Consumer received submission.");
 
-            const submissionForGrading = JSON.parse(submissionString);
+            const submissionForGrading = JSON.parse(submissionRecieved.element);
 
-            const gradingResponse = await sendToGradingAPI(
-                submissionForGrading
-            );
+            const finalForm = {
+                code: submissionForGrading.code,
+                testCode: submissionForGrading.testCode,
+            };
+
+            console.log("Final Form Check: ", finalForm);
+
+            const gradingResponse = await sendToGradingAPI(finalForm);
 
             if (gradingResponse) {
-                console.log("Submssion processed successfuly");
+                console.log("Submission processed successfully.");
             } else {
-                consol.log("Failed to process submission.");
+                console.error("Failed to process submission.");
             }
+        } else {
+            console.error("No submission received or data format error.");
         }
     }
 };

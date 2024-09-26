@@ -95,20 +95,20 @@ services:
     expose:
       - 6379
 
-  # producer:
-  #   build: producer
-  #   image: producer
-  #   restart: "no"
-  #   volumes:
-  #     - ./producer/:/app
-  #     - ./app-cache/:/app-cache
-  #   expose:
-  #     - 7778
+  producer:
+    build: producer
+    image: producer
+    restart: "no"
+    volumes:
+      - ./producer/:/app
+      - ./app-cache/:/app-cache
+    expose:
+      - 7778
 
-  # consumer:
-  #   build: consumer
-  #   image: consumer
-  #   restart: "no"
-  #   volumes:
-  #     - ./consumer/:/app
-  #     - ./app-cache/:/app-cache
+  consumer:
+    build: consumer
+    image: consumer
+    restart: "no"
+    volumes:
+      - ./consumer/:/app
+      - ./app-cache/:/app-cache

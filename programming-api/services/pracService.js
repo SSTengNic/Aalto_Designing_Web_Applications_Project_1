@@ -5,6 +5,12 @@ const getAssignments = async () => {
     return await sql`SELECT * FROM programming_assignments `;
 };
 
+const getAssignment = async (id) => {
+    const assignment =
+        await sql`SELECT * FROM programming_assignments WHERE assignment_order = ${id}`;
+    return assignment[0];
+};
+
 const getPrac = async (id) => {
     const prac =
         await sql` SELECT * FROM programming_assignment_submissions WHERE id = ${id}`;
@@ -41,4 +47,11 @@ const submissionCheck = async (programming_assignment_id, code, user_uuid) => {
     return False;
 };
 
-export { getPrac, getPracs, addPracs, getAssignments, submissionCheck };
+export {
+    getPrac,
+    getPracs,
+    addPracs,
+    getAssignments,
+    submissionCheck,
+    getAssignment,
+};

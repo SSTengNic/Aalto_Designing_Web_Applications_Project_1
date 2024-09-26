@@ -14,6 +14,27 @@
     let codeContent = "";
     let editorView;
 
+    const sendToQueue = async (codeContent) => {
+        //Sends to producer to queue up for consumer to send for grading
+        //Using default 1 for now
+        const assignment = await fetch("/api/assignment/1");
+        const assignmentData = await assignment.json();
+
+        const gradingPayLoad = {
+            code: codeContent,
+            test_code: assignmentData.test_code,
+        };
+        //For now, theree is no "return" function to respond. Just look out for the consumer's reply.
+        console.log("Sending to producer.");
+        await fetch("/queue/publish", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(gradingPayLoad),
+        });
+        console.log("Producer/Grading finished.");
+    };
     const submitCode = async () => {
         codeContent = editorView.state.doc.toString();
         const response = await fetch("/api/prac", {
@@ -28,10 +49,6 @@
             }),
         });
 
-        codeContent = "";
-
-        console.log("Response Status:", response.body);
-
         if (response.ok) {
             const responseData = await response.json();
             if (responseData.message === "Submission already exists.") {
@@ -39,11 +56,13 @@
                     `Submissions already exists.\n Status: ${responseData.status} \n Grader Feedback: ${responseData.grader_feedback} \n Correct: ${responseData.correct}`
                 );
             } else {
+                sendToQueue(codeContent);
                 alert(
                     `Submission was successful. Please wait for it to be graded accordingly.${responseData.message}`
                 );
             }
         }
+        codeContent = "";
     };
     onMount(() => {
         let startState = EditorState.create({
