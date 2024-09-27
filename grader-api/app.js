@@ -1,6 +1,7 @@
 import { serve } from "./deps.js";
 import { grade } from "./services/gradingService.js";
 
+const webSocketClients = [];
 let state = -1;
 
 const getCode = () => {
@@ -57,29 +58,76 @@ if __name__ == '__main__':
     return await grade(code, testCode);
 };
 
-const handleRequest = async (request) => {
-    // the starting point for the grading api grades code following the
-    // gradingDemo function, but does not e.g. use code from the user
+const handleGradingRequest = async (request) => {
     let result;
     try {
         const requestData = await request.json();
-
-        console.log("Request data:");
-        console.log(requestData);
+        console.log("Request data:", requestData);
 
         const code = requestData.code;
         const testCode = requestData.testCode;
 
+        // Call the grading function
         result = await grade(code, testCode);
-    } catch (e) {
-        result = await gradingDemo();
+        //By now, there is a submission within the assignment datatable. I need to update that database, based on the grading result.
+        // The concern I am having now is, what exactly is shown.. ah. okay, if it is a submission already done, I have to edit the programming-api to show case the details onto the cards first.
+        //Okay, let me fix for that scenario first. Then, I will connect the status showing component to the grader-api as well.
+    } catch (error) {
+        console.error("Error grading:", error);
+        result = "Grading failed, demo result used.";
     }
 
-    // in practice, you would either send the code to grade to the grader-api
-    // or use e.g. a message queue that the grader api would read and process
+    // Notify all connected WebSocket clients with the grading result
+    webSocketClients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            console.log("READY TO SEND VIA WEBSOCKET.");
+            client.send(JSON.stringify({ result })); // Send the result through WebSocket
+        }
+    });
 
-    return new Response(JSON.stringify({ result: result }));
+    return new Response(JSON.stringify({ result }), {
+        headers: { "Content-Type": "application/json" },
+    });
 };
 
+// Handle WebSocket connection for real-time updates
+const handleWebSocketRequest = async (request) => {
+    const { socket, response } = Deno.upgradeWebSocket(request);
+
+    socket.onopen = () => {
+        console.log("WebSocket connection opened.");
+    };
+
+    socket.onmessage = (event) => {
+        console.log("Message from client:", event.data);
+    };
+
+    socket.onclose = () => {
+        console.log("WebSocket connection closed.");
+        const index = webSocketClients.indexOf(socket);
+        if (index > -1) {
+            webSocketClients.splice(index, 1); // Remove client when connection closes
+        }
+    };
+
+    // Add the client to the list of WebSocket clients
+    webSocketClients.push(socket);
+    return response;
+};
+
+// Handle both HTTP and WebSocket requests
+const handleRequest = async (request) => {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/grade") {
+        return handleGradingRequest(request); // Handle grading submission
+    } else if (url.pathname === "/ws") {
+        if (request.headers.get("upgrade") === "websocket") {
+            return handleWebSocketRequest(request); // Handle WebSocket connection
+        }
+    }
+
+    return new Response("Not Found", { status: 404 });
+};
 const portConfig = { port: 7000, hostname: "0.0.0.0" };
 serve(handleRequest, portConfig);

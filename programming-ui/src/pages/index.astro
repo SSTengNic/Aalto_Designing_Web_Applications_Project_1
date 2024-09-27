@@ -4,9 +4,11 @@ import GradingButton from "../components/GradingButton.svelte";
 import RotatingCard from "../components/RotatingCard.svelte";
 import TestingStuff from "../components/testingStuff.svelte";
 import CodeEditor from "../components/CodeEditor.svelte";
+import StatusBar from "../components/StatusBar.svelte";
 ---
 
 <Layout>
     <RotatingCard client:load />
-    <GradingButton client:only={"svelte"} />
+    <!-- <GradingButton client:only={"svelte"} /> -->
+    <!-- <StatusBar client:load /> -->
 </Layout>

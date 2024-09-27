@@ -1,6 +1,6 @@
 <script>
     import { userUuid } from "../stores/stores.js";
-    import { counter } from "../stores/stores.js";
+    import { status, feedback, correct, message } from "../stores/stores.js";
 
     import { onMount } from "svelte";
     import { EditorState } from "@codemirror/state";
@@ -51,15 +51,13 @@
 
         if (response.ok) {
             const responseData = await response.json();
+            message.set(responseData.message);
             if (responseData.message === "Submission already exists.") {
-                alert(
-                    `Submissions already exists.\n Status: ${responseData.status} \n Grader Feedback: ${responseData.grader_feedback} \n Correct: ${responseData.correct}`
-                );
+                status.set(responseData.status);
+                feedback.set(responseData.grader_feedback);
+                correct.set(responseData.correct);
             } else {
                 sendToQueue(codeContent);
-                alert(
-                    `Submission was successful. Please wait for it to be graded accordingly.${responseData.message}`
-                );
             }
         }
         codeContent = "";

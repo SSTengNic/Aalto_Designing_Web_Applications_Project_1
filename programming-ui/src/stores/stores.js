@@ -11,4 +11,7 @@ const counter = writable(0);
 export const userUuid = readable(user);
 export { counter };
 
-export const gradingResult = writable("");
+export const status = writable("");
+export const feedback = writable("");
+export const correct = writable("");
+export const message = writable("Nothing yet...");

@@ -8,7 +8,7 @@ const client = createClient({
 const sendToGradingAPI = async (submission) => {
     try {
         console.log("submission is: ", submission);
-        const response = await fetch("http://grader-api:7000/", {
+        const response = await fetch("http://grader-api:7000/grade", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -20,14 +20,6 @@ const sendToGradingAPI = async (submission) => {
             throw new Error(`Grading API error: ${response.statusText}`);
         }
 
-        const responseData = await response.json();
-        const result = responseData.result;
-
-        // Format the result by replacing \n with actual line breaks
-        const formattedResult = result.replace(/\\n/g, "\n").trim();
-        console.log("Grading API Response:", formattedResult);
-
-        // Process the response (e.g., update the database)
         return formattedResult;
     } catch (error) {
         console.error("Error sending to grading API:", error);

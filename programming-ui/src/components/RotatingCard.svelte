@@ -1,5 +1,6 @@
 <script>
     import CodeEditor from "./CodeEditor.svelte";
+    import StatusBar from "./StatusBar.svelte";
     import { counter } from "../stores/stores.js";
     let flipped = false;
     let i = 0;
@@ -15,9 +16,9 @@
     let AssignmentPromise = getAllQuestions();
 </script>
 
-<div class="flex max-h-screen justify-center items-center mt-15">
+<div class="flex justify-center items-center mb-5">
     <!-- Card Container with Perspective -->
-    <div class="h-96 w-11/12" style="perspective: 1000px;">
+    <div class="h-[550px] w-10/12" style="perspective: 1000px;">
         <!-- Card Inner (handles the 3D rotation) -->
         <div
             class="relative h-full w-full rounded-xl shadow-xl transition-transform duration-500"
@@ -35,7 +36,7 @@
                 </h1>
 
                 <button
-                    class="mt-2 px-10 py-6 bg-white text-black font-bold rounded"
+                    class="mt-2 px-10 py-6 bg-white text-black font-bold rounded border-2 border-black"
                     on:click={flipCard}
                 >
                     Flip to Back
@@ -45,7 +46,7 @@
             <!-- Back Side -->
 
             <div
-                class="absolute inset-0 bg-white text-black flex flex-col items-center justify-center rounded-xl border-2 border-black"
+                class="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-black flex flex-col items-center justify-center rounded-xl border-2 border-black"
                 style="backface-visibility: hidden; transform: rotateY(180deg);"
             >
                 <h1 class="text-xl font-bold">Back Side</h1>
@@ -55,6 +56,7 @@
                 {:then AssignmentPromise}
                     <p>{AssignmentPromise[0].handout}</p>
                     <CodeEditor client:load />
+                    <StatusBar client:load />
                 {:catch error}
                     <p>Error loading items: {error.message}</p>
                 {/await}

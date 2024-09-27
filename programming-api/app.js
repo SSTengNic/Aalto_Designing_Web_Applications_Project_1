@@ -122,7 +122,7 @@ const handleGradingRequest = async (request) => {
         testCode: requestData.testCode,
     };
 
-    const response = await fetch("http://grader-api:7000/", {
+    const response = await fetch("http://grader-api:7000/grade", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
