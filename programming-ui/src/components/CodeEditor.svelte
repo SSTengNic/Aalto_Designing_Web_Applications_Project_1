@@ -21,8 +21,10 @@
         const assignmentData = await assignment.json();
 
         const gradingPayLoad = {
+            assignmentId: assignmentData.id,
             code: codeContent,
-            test_code: assignmentData.test_code,
+            testCode: assignmentData.test_code,
+            user_uuid: $userUuid,
         };
         //For now, theree is no "return" function to respond. Just look out for the consumer's reply.
         console.log("Sending to producer.");

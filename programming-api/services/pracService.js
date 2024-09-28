@@ -21,6 +21,33 @@ const getPracs = async () => {
     return await sql`SELECT * FROM programming_assignment_submissions`;
 };
 
+const updatePrac = async (
+    programming_assignment_id,
+    code,
+    user_uuid,
+    SUBMISSION_STATUS,
+    grader_feedback,
+    correct
+) => {
+    try {
+        const updatedSubmission = await sql`
+            UPDATE programming_assignment_submissions
+            SET 
+                status = ${SUBMISSION_STATUS}, -- Corrected field name and value
+                grader_feedback = ${grader_feedback}, 
+                correct = ${correct}
+            WHERE 
+                code = ${code} 
+                AND user_uuid = ${user_uuid} 
+                AND programming_assignment_id = ${programming_assignment_id}
+            RETURNING *;
+        `;
+        return updatedSubmission[0];
+    } catch (error) {
+        console.error("Error updating submission: ", error);
+    }
+};
+
 const addPracs = async (
     programming_assignment_id,
     code,
@@ -54,4 +81,5 @@ export {
     getAssignments,
     submissionCheck,
     getAssignment,
+    updatePrac,
 };

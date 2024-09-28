@@ -5,9 +5,44 @@ const client = createClient({
     pingInterval: 1000,
 });
 
+const sendToUpdateSubmission = async (gradingResponse, finalForm) => {
+    let passFail = true;
+
+    try {
+        const responseBody = gradingResponse.result;
+        console.log("responseBody: ", responseBody);
+
+        // Check for the "FAILED: " string in the response body
+        if (responseBody.includes("FAILED: ")) {
+            passFail = false;
+        }
+
+        const updatePayload = {
+            programming_assignment_id: finalForm.assignmentId,
+            code: finalForm.code,
+            user_uuid: finalForm.user_uuid,
+            SUBMISSION_STATUS: "processed",
+            grader_feedback: responseBody,
+            correct: passFail,
+        };
+        console.log("PAYLOAD CHECK.", updatePayload);
+
+        const updatedAssignment = await fetch("http://nginx:7800/api/prac", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatePayload),
+        });
+
+        return await updatedAssignment.json();
+    } catch (error) {
+        console.error("Error sending to update submission: ", error);
+    }
+};
 const sendToGradingAPI = async (submission) => {
     try {
-        console.log("submission is: ", submission);
+        // console.log("submission is: ", submission);
         const response = await fetch("http://grader-api:7000/grade", {
             method: "POST",
             headers: {
@@ -16,11 +51,13 @@ const sendToGradingAPI = async (submission) => {
             body: JSON.stringify(submission),
         });
 
+        return await response.json();
+
         if (!response.ok) {
             throw new Error(`Grading API error: ${response.statusText}`);
         }
 
-        return formattedResult;
+        // Read the response as text first
     } catch (error) {
         console.error("Error sending to grading API:", error);
         return null;
@@ -31,25 +68,32 @@ const clientStart = async () => {
     await client.connect();
 
     while (true) {
-        const submissionRecieved = await client.brPop("submissionQueue", 0);
-        console.log("submissionRecievd: ", submissionRecieved);
+        const submissionReceived = await client.brPop("submissionQueue", 0);
+        console.log("submissionReceived: ", submissionReceived);
 
-        if (submissionRecieved) {
+        if (submissionReceived) {
             console.log("Consumer received submission.");
 
-            const submissionForGrading = JSON.parse(submissionRecieved.element);
+            const submissionForGrading = JSON.parse(submissionReceived.element);
 
             const finalForm = {
+                assignmentId: submissionForGrading.assignmentId,
+                user_uuid: submissionForGrading.user_uuid,
                 code: submissionForGrading.code,
                 testCode: submissionForGrading.testCode,
             };
 
-            console.log("Final Form Check: ", finalForm);
-
             const gradingResponse = await sendToGradingAPI(finalForm);
 
             if (gradingResponse) {
-                console.log("Submission processed successfully.");
+                const updatedAssignment = await sendToUpdateSubmission(
+                    gradingResponse,
+                    finalForm
+                );
+                console.log(
+                    "Update successful. updatedAssignment: ",
+                    updatedAssignment
+                );
             } else {
                 console.error("Failed to process submission.");
             }

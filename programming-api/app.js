@@ -35,6 +35,25 @@ const GetPracs = async (request) => {
     return Response.json(await cachedPracService.getPracs());
 };
 
+const UpdatePrac = async (request) => {
+    let prac;
+    try {
+        prac = await request.json();
+        const updatedSubmission = await cachedPracService.updatePrac(
+            prac.programming_assignment_id,
+            prac.code,
+            prac.user_uuid,
+            prac.SUBMISSION_STATUS,
+            prac.grader_feedback,
+            prac.correct
+        );
+
+        return Response.json(updatedSubmission);
+    } catch (error) {
+        return new Response("Internal Server Error", { status: 500 });
+    }
+};
+
 const GetPrac = async (request, urlPatternResult) => {
     const id = urlPatternResult.pathname.groups.id;
     try {
@@ -155,6 +174,12 @@ const urlMapping = [
         pattern: new URLPattern({ pathname: "/assignments" }),
         fn: getAssignments,
     },
+    {
+        method: "PUT",
+        pattern: new URLPattern({ pathname: "/prac" }),
+        fn: UpdatePrac,
+    },
+
     {
         method: "POST",
         pattern: new URLPattern({ pathname: "/prac" }),
