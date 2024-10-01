@@ -8,7 +8,8 @@ ENV PATH /app/node_modules/.bin:$PATH
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install --force 
+#Im forcing the install for the svelte-confetti. If there are any potential bugs, I will revert back and not use the confetti
 
 COPY . .
 

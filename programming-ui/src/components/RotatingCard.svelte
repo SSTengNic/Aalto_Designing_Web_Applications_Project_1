@@ -1,9 +1,8 @@
 <script>
     import CodeEditor from "./CodeEditor.svelte";
     import StatusBar from "./StatusBar.svelte";
-    import { counter } from "../stores/stores.js";
+    import { counter, correct } from "../stores/stores.js";
     let flipped = false;
-    let i = 0;
 
     const flipCard = () => {
         flipped = !flipped;
@@ -17,7 +16,6 @@
 </script>
 
 <div class="flex justify-center items-center mb-5">
-    <!-- Card Container with Perspective -->
     <div class="h-[550px] w-10/12" style="perspective: 1000px;">
         <!-- Card Inner (handles the 3D rotation) -->
         <div
@@ -49,12 +47,14 @@
                 class="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-black flex flex-col items-center justify-center rounded-xl border-2 border-black"
                 style="backface-visibility: hidden; transform: rotateY(180deg);"
             >
-                <h1 class="text-xl font-bold">Back Side</h1>
+                <!-- <h1 class="text-xl font-bold">Back Side</h1> -->
 
                 {#await AssignmentPromise}
                     <p>Loading items...</p>
                 {:then AssignmentPromise}
-                    <p>{AssignmentPromise[0].handout}</p>
+                    <p class="text-xl font-bold">
+                        {AssignmentPromise[$counter].handout}
+                    </p>
                     <CodeEditor client:load />
                     <StatusBar client:load />
                 {:catch error}

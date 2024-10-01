@@ -4,6 +4,8 @@ import * as programmingAssignmentService from "./services/programmingAssignmentS
 import { cacheMethodCalls } from "./util/cachUtil.js";
 import { serve } from "./deps.js";
 
+const webSocketClients = new Set();
+
 // Cache method calls
 const cachedPracService = cacheMethodCalls(pracService, ["getPracs"]);
 
@@ -11,7 +13,7 @@ const cachedPracService = cacheMethodCalls(pracService, ["getPracs"]);
 //const cachedGradingService = cacheMethodCalls(pracService, ["getPracs"]);
 
 const getAssignments = async (request) => {
-    return Response.json(await cachedPracService.getAssignments());
+    return Response.json(await pracService.getAssignments());
 };
 
 const getAssignment = async (request, urlPatternResult) => {
@@ -48,10 +50,57 @@ const UpdatePrac = async (request) => {
             prac.correct
         );
 
+        console.log("UpdatePrac, updatedSubmission: ", updatedSubmission);
+
+        sendMessageToClients(
+            JSON.stringify({
+                message: "UpdatePrac, updatePrac response",
+                prac: updatedSubmission,
+            })
+        );
+
         return Response.json(updatedSubmission);
     } catch (error) {
         return new Response("Internal Server Error", { status: 500 });
     }
+};
+
+const handleWebSocket = async (request) => {
+    const { socket, response } = Deno.upgradeWebSocket(request);
+
+    // Store the WebSocket connection
+    webSocketClients.add(socket);
+
+    socket.onopen = () => {
+        console.log("WebSocket connection openedss");
+    };
+
+    let interval = setInterval(() => {
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send("ping");
+        }
+    }, 5000);
+
+    socket.onmessage = (event) => {
+        console.log("Received message:", event.data);
+        // Handle incoming messages as needed
+    };
+
+    socket.onclose = () => {
+        console.log("WebSocket connection closed");
+        webSocketClients.delete(socket);
+    };
+
+    return response; // Return the WebSocket upgrade response
+};
+
+// Send message to WebSocket clients
+const sendMessageToClients = (message) => {
+    webSocketClients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+        }
+    });
 };
 
 const GetPrac = async (request, urlPatternResult) => {
@@ -93,6 +142,16 @@ const PostPrac = async (request) => {
         );
         if (submissionCheck) {
             const { status, grader_feedback, correct } = submissionCheck;
+
+            console.log("PostPrac, submissionCheck: ", submissionCheck);
+
+            sendMessageToClients(
+                JSON.stringify({
+                    message: "PostPrac, SUbmissionCheck",
+                    prac: submissionCheck,
+                })
+            );
+
             return new Response(
                 JSON.stringify({
                     message: "Submission already exists.",
@@ -175,6 +234,11 @@ const urlMapping = [
         fn: getAssignments,
     },
     {
+        method: "GET",
+        pattern: new URLPattern({ pathname: "/ws" }), // WebSocket route
+        fn: handleWebSocket,
+    },
+    {
         method: "PUT",
         pattern: new URLPattern({ pathname: "/prac" }),
         fn: UpdatePrac,
@@ -194,6 +258,9 @@ const urlMapping = [
 
 // Handle incoming requests
 const handleRequest = async (request) => {
+    if (request.url === "/ws" && request.method === "GET") {
+        return await handleWebSocket(request);
+    }
     const mapping = urlMapping.find(
         (um) => um.method === request.method && um.pattern.test(request.url)
     );

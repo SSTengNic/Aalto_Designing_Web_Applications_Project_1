@@ -13,7 +13,7 @@ const sendToUpdateSubmission = async (gradingResponse, finalForm) => {
         console.log("responseBody: ", responseBody);
 
         // Check for the "FAILED: " string in the response body
-        if (responseBody.includes("FAILED: ")) {
+        if (responseBody.includes("Traceback")) {
             passFail = false;
         }
 
@@ -43,7 +43,7 @@ const sendToUpdateSubmission = async (gradingResponse, finalForm) => {
 const sendToGradingAPI = async (submission) => {
     try {
         // console.log("submission is: ", submission);
-        const response = await fetch("http://grader-api:7000/grade", {
+        const response = await fetch("http://nginx:7800/api/grade", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -69,7 +69,7 @@ const clientStart = async () => {
 
     while (true) {
         const submissionReceived = await client.brPop("submissionQueue", 0);
-        console.log("submissionReceived: ", submissionReceived);
+        // console.log("submissionReceived: ", submissionReceived);
 
         if (submissionReceived) {
             console.log("Consumer received submission.");
