@@ -1,6 +1,7 @@
 <script>
     export let title;
     export let value;
+    export let valueid;
 </script>
 
 <div
@@ -14,7 +15,8 @@
                 {title}
             </dt>
             <dd
-                class="mt-1 text-2xl leading-9 font-semibold text-indigo-600 dark:text-indigo-400"
+                data-testid={valueid}
+                class=" mt-1 text-2xl leading-9 font-semibold text-indigo-600 dark:text-indigo-400"
             >
                 {value || "N/A"}
             </dd>

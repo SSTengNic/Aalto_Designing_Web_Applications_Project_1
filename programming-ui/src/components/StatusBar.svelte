@@ -70,7 +70,11 @@
 <p class="mt-2">{$message}</p>
 
 <div class="flex flex-initial justify-center gap-5 w-full h-[80px] mt-5 mb-5">
-    <StatusButton title="Status" value={$status} />
-    <AlertButton title="Click to see feedback" value={$feedback} />
-    <StatusButton title="Correct" value={$correct} />
+    <StatusButton valueid="status-button" title="Status" value={$status} />
+    <AlertButton
+        valueid="alert-button"
+        title="Click to see feedback"
+        value={$feedback}
+    />
+    <StatusButton valueid="correct-button" title="Correct" value={$correct} />
 </div>

@@ -4,10 +4,12 @@
     const sendAlert = () => {
         alert(value);
     };
+    export let valueid;
 </script>
 
 <button
-    class="bg-white flex-initial overflow-hidden shadow sm:rounded-lg dark:bg-gray-900 w-50 flex flex-col justify-center rounded-xl focus:outline-none hover:shadow-lg transition-shadow duration-200"
+    data-testid={valueid}
+    class=" bg-white flex-initial overflow-hidden shadow sm:rounded-lg dark:bg-gray-900 w-50 flex flex-col justify-center rounded-xl focus:outline-none hover:shadow-lg transition-shadow duration-200"
     on:click={sendAlert}
 >
     <div class="px-4 py-5 sm:p-6 flex flex-col justify-center">

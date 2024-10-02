@@ -44,7 +44,7 @@
         console.log("Producer/Grading finished.");
     };
     const submitCode = async () => {
-        codeContent = editorView.state.doc.toString();
+        // codeContent = editorView.state.doc.toString();
 
         const response = await fetch("/api/prac", {
             method: "POST",
@@ -110,18 +110,30 @@
     };
 </script>
 
-<div
+<label for="editor-space">Code Editor</label>
+<!-- <div
+    id="editor-space"
+    role="document"
+    data-testid="editor-space"
     class="editor-container rounded-xl h-[280px] w-8/12 border-2 border-black overflow-y-auto"
     bind:this={editor}
-></div>
+></div> -->
+<textarea
+    data-testid="code-editor"
+    class="editor-container rounded-xl h-[280px] w-8/12 border-2 border-black overflow-y-auto"
+    bind:value={codeContent}
+></textarea>
+<!-- Using this because Playwright cannot locate CodeMirror editor space -->
 <div class="flex flex-initial justify-center">
     <button
+        data-testid="submit-button"
         on:click={submitCode}
         class="mt-4 px-4 py-2 bg-white text-green-500 font-bold rounded border-2 border-black"
         >Submit Work</button
     >
     {#if $counter < 2}
         <button
+            data-testid="next-button"
             class={`mt-4 px-4 py-2 bg-white text-green-500 font-bold rounded border-2 border-black ${
                 ($correct === "Yes" || $correct === true) && $counter < 2
                     ? ""
@@ -133,6 +145,7 @@
         </button>
     {:else}
         <button
+            data-testid="confetti-button"
             class={`mt-4 px-4 py-2 bg-white text-green-500 font-bold rounded border-2 border-black ${
                 ($correct === "Yes" || $correct === true) && $counter == 2
                     ? ""

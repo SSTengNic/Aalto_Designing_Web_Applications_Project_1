@@ -34,6 +34,7 @@
                 </h1>
 
                 <button
+                    data-testid="flip-button"
                     class="mt-2 px-10 py-6 bg-white text-black font-bold rounded border-2 border-black"
                     on:click={flipCard}
                 >
