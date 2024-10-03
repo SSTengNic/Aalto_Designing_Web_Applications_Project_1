@@ -43,33 +43,41 @@
         });
         console.log("Producer/Grading finished.");
     };
+
+    const booleanConvert = (value) => {
+        const stringedValue = value ? "Yes" : "No";
+        return stringedValue;
+    };
     const submitCode = async () => {
         // codeContent = editorView.state.doc.toString();
 
-        const response = await fetch("/api/prac", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                programming_assignment_id: $counter + 1,
-                code: codeContent,
-                user_uuid: $userUuid,
-            }),
-        });
+        if (codeContent === "") {
+            alert("Please input something into the text area.");
+        } else {
+            const response = await fetch("/api/prac", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    programming_assignment_id: $counter + 1,
+                    code: codeContent,
+                    user_uuid: $userUuid,
+                }),
+            });
 
-        if (response.ok) {
-            const responseData = await response.json();
-            message.set(responseData.message);
-            if (responseData.message === "Submission already exists.") {
-                status.set(responseData.status);
-                feedback.set(responseData.grader_feedback);
-                correct.set(responseData.correct);
-            } else {
-                sendToQueue(codeContent);
+            if (response.ok) {
+                const responseData = await response.json();
+                message.set(responseData.message);
+                if (responseData.message === "Submission already exists.") {
+                    status.set(responseData.status);
+                    feedback.set(responseData.grader_feedback);
+                    correct.set(booleanConvert(responseData.correct));
+                } else {
+                    sendToQueue(codeContent);
+                }
             }
         }
-        codeContent = "";
     };
     onMount(() => {
         let startState = EditorState.create({

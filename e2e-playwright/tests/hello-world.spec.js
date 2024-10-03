@@ -22,7 +22,6 @@ test("Submission fails and checks the feedback on incorrect squbmission", async 
         '[data-testid="code-editor"]',
         'def hello(): \n    return "Hellos"'
     );
-    await page.waitForTimeout(3000);
 
     await page.getByTestId("submit-button").click();
     await page.waitForTimeout(5000);
@@ -52,9 +51,9 @@ test("Submission passes and checks the notification on the correctness of submis
         '[data-testid="code-editor"]',
         'def hello(): \n    return "Hello"'
     );
-    await page.waitForTimeout(3000);
+
     await page.getByTestId("submit-button").click();
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(1000);
     await expect(page.getByTestId("correct-button")).toHaveText("Yes");
 });
 
@@ -73,9 +72,9 @@ test("Submission passes, checks the notification on the correctness of submissio
         '[data-testid="code-editor"]',
         'def hello(): \n    return "Hello"'
     );
-    await page.waitForTimeout(2000);
+
     await page.getByTestId("submit-button").click();
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(1000);
     await expect(page.getByTestId("correct-button")).toHaveText("Yes");
 
     //Moves to next page and checks the next question

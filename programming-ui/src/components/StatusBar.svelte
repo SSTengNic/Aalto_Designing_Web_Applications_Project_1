@@ -10,10 +10,12 @@
         counter,
     } from "../stores/stores.js";
 
-    $: if ($message) {
+    $: if ($status != "N/A") {
         setTimeout(() => {
             message.set("");
-        }, 3000);
+            status.set("N/A");
+            correct.set("N/A");
+        }, 4000);
     }
 
     let ws;
